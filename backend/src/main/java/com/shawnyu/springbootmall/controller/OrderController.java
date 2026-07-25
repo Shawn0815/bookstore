@@ -2,7 +2,6 @@ package com.shawnyu.springbootmall.controller;
 
 import com.shawnyu.springbootmall.dto.OrderQueryParams;
 import com.shawnyu.springbootmall.dto.CreateOrderRequest;
-import com.shawnyu.springbootmall.model.Book;
 import com.shawnyu.springbootmall.model.Order;
 import com.shawnyu.springbootmall.model.User;
 import com.shawnyu.springbootmall.service.OrderService;

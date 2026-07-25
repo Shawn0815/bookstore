@@ -1,11 +1,11 @@
 package com.shawnyu.springbootmall.dao;
 
-import com.shawnyu.springbootmall.dto.BookQueryParams;
-import com.shawnyu.springbootmall.model.Book;
-import com.shawnyu.springbootmall.dto.BookRequest;
-import com.shawnyu.springbootmall.model.Category;
-
 import java.util.List;
+
+import com.shawnyu.springbootmall.dto.BookQueryParams;
+import com.shawnyu.springbootmall.dto.BookRequest;
+import com.shawnyu.springbootmall.model.Book;
+import com.shawnyu.springbootmall.model.Category;
 
 public interface BookDao {
 
@@ -21,7 +21,7 @@ public interface BookDao {
 
     void updateBook(Integer bookId, BookRequest bookRequest);
 
-    void updateStock(Integer bookId, Integer stock);
+    int updateStock(Integer bookId, Integer quantity);
 
     void updateSalesCount(Integer bookId, Integer salesCount);
 

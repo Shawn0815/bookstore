@@ -1,12 +1,10 @@
 package com.shawnyu.springbootmall.dao.impl;
 
-import com.shawnyu.springbootmall.dao.BookDao;
-import com.shawnyu.springbootmall.dto.BookQueryParams;
-import com.shawnyu.springbootmall.model.Book;
-import com.shawnyu.springbootmall.dto.BookRequest;
-import com.shawnyu.springbootmall.model.Category;
-import com.shawnyu.springbootmall.rowmapper.BookRowMapper;
-import com.shawnyu.springbootmall.rowmapper.CategoryRowMapper;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -14,10 +12,14 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.shawnyu.springbootmall.dao.BookDao;
+import com.shawnyu.springbootmall.dto.BookQueryParams;
+import com.shawnyu.springbootmall.dto.BookRequest;
+import com.shawnyu.springbootmall.dto.BookSortColumn;
+import com.shawnyu.springbootmall.model.Book;
+import com.shawnyu.springbootmall.model.Category;
+import com.shawnyu.springbootmall.rowmapper.BookRowMapper;
+import com.shawnyu.springbootmall.rowmapper.CategoryRowMapper;
 
 @Component
 public class BookDaoImpl implements BookDao {
@@ -76,8 +78,12 @@ public class BookDaoImpl implements BookDao {
             map.put("search", "%" + bookQueryParams.getSearch() + "%");
         }
 
-        // 排序
-        sql = sql + " ORDER BY " + bookQueryParams.getSortBy() + " " + bookQueryParams.getOrder();
+        // 排序：sortBy/order 直接來自使用者輸入，透過白名單轉換避免 SQL Injection
+        String sortColumn = BookSortColumn.fromParam(bookQueryParams.getSortBy()).getColumnName();
+        String sortOrder = "asc".equalsIgnoreCase(bookQueryParams.getOrder()) ? "ASC" : "DESC";
+        // book_id 當作次要排序鍵，確保排序值相同時分頁結果穩定；
+        // 方向要跟主排序一致，索引才能整個往同一個方向掃過去，不然 MySQL 還是得多做一次 filesort
+        sql = sql + " ORDER BY " + sortColumn + " " + sortOrder + ", book_id " + sortOrder;
 
         // 分頁
         sql = sql + " LIMIT :limit OFFSET :offset";
@@ -165,16 +171,17 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
-    public void updateStock(Integer bookId, Integer stock) {
-        String sql = "UPDATE book SET stock = :stock, last_modified_date = :lastModifiedDate " +
-                "WHERE book_id = :bookId";
+    public int updateStock(Integer bookId, Integer quantity) {
+        // 使用 atomic update 來保證原子性
+        String sql = "UPDATE book SET stock = stock - :quantity, last_modified_date = :lastModifiedDate " +
+                "WHERE book_id = :bookId AND stock >= :quantity";
 
         Map<String, Object> map = new HashMap<>();
         map.put("bookId", bookId);
-        map.put("stock", stock);
+        map.put("quantity", quantity);
         map.put("lastModifiedDate", new Date());
 
-        namedParameterJdbcTemplate.update(sql, map);
+        return namedParameterJdbcTemplate.update(sql, map);
     }
 
     @Override

@@ -84,19 +84,19 @@ public class OrderServiceImpl implements OrderService {
         for (BuyItem buyItem: createOrderRequest.getBuyItemList()) {
             Book book = bookDao.getBookById(buyItem.getBookId());
 
-            // 檢查商品是否存在、庫存是否足夠
+            // 檢查商品是否存在
             if (book == null) {
                 log.warn("商品 {} 不存在", buyItem.getBookId());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "商品 id: " + buyItem.getBookId() + " 不存在");
             }
-            else if (book.getStock() < buyItem.getQuantity()) {
-                log.warn("商品 {} 庫存不足，無法購買。剩餘庫存 {}，欲購買數量 {}",
-                        buyItem.getBookId(), book.getStock(), buyItem.getQuantity());
+
+            // 原子扣除庫存，避免超賣；affectedRows = 0 代表庫存不足
+            int affectedRows = bookDao.updateStock(book.getBookId(), buyItem.getQuantity());
+            if (affectedRows == 0) {
+                log.warn("商品 {} 庫存不足，無法購買。欲購買數量 {}",
+                        buyItem.getBookId(), buyItem.getQuantity());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "商品庫存不足");
             }
-
-            // 扣除商品庫存
-            bookDao.updateStock(book.getBookId(), book.getStock() - buyItem.getQuantity());
 
             // 增加商品銷售書量
             bookDao.updateSalesCount(book.getBookId(), book.getSalesCount() + buyItem.getQuantity());
