@@ -10,4 +10,6 @@ public interface UserDao {
     Integer createUser(UserRegisterRequest userRegisterRequest);
 
     User getUserByEmail(String email);
+
+    void updatePassword(Integer userId, String newHashedPassword);
 }

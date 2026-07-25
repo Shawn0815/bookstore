@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +23,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User getUserbyId(Integer userId) {
@@ -44,8 +48,8 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "該帳號已經被註冊");
         }
 
-        // 使用 MD5 生成密碼的雜湊值
-        String hashedPassword = DigestUtils.md5DigestAsHex(userRegisterRequest.getPassword().getBytes());
+        // 使用 BCrypt 生成密碼的雜湊值（自動處理 salt，不用額外存欄位）
+        String hashedPassword = passwordEncoder.encode(userRegisterRequest.getPassword());
         userRegisterRequest.setPassword(hashedPassword);
 
         // 創建帳號
@@ -62,15 +66,32 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "帳號不存在");
         }
 
-        // 使用 MD5 生成密碼的雜湊值
-        String hashedPassword = DigestUtils.md5DigestAsHex(userLoginRequest.getPassword().getBytes());
+        String rawPassword = userLoginRequest.getPassword();
+        String storedPassword = user.getPassword();
 
-        // 2. 檢查密碼是否正確（記得用 equals）
-        if (!user.getPassword().equals(hashedPassword)) {
+        // 2. 檢查密碼是否正確：相容舊帳號的 MD5 雜湊，並在登入成功時無痛升級成 BCrypt
+        boolean passwordMatched;
+        if (isLegacyMd5Hash(storedPassword)) {
+            String hashedPassword = DigestUtils.md5DigestAsHex(rawPassword.getBytes());
+            passwordMatched = storedPassword.equals(hashedPassword);
+
+            if (passwordMatched) {
+                userDao.updatePassword(user.getUserId(), passwordEncoder.encode(rawPassword));
+            }
+        } else {
+            passwordMatched = passwordEncoder.matches(rawPassword, storedPassword);
+        }
+
+        if (!passwordMatched) {
             log.warn("email {} 的密碼不正確", userLoginRequest.getEmail());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "密碼錯誤");
         }
 
         return user;
+    }
+
+    // MD5 雜湊固定是 32 個十六進位字元；BCrypt 雜湊固定 60 個字元、開頭是 $2a$/$2b$/$2y$
+    private boolean isLegacyMd5Hash(String storedPassword) {
+        return storedPassword != null && storedPassword.length() == 32;
     }
 }
