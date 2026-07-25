@@ -1,0 +1,246 @@
+/* GOOGLE FONTS */
+
+@import url("https://fonts.googleapis.com/css?family=Proza+Libre");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Itim&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
+
+:root {
+  --title-font-family: "Proza Libre", serif;
+  --default-font-family: "Itim", sans-serif;
+  --default-font-size: 1rem;
+  --default-text-color: #111;
+  --neutral-color: #c4c4c4;
+
+  /* 調整為大地色系 */
+  --primary-color: #8b4513;
+  --secondary-color: #9a6f4e;
+  --primary-color-dark: darkblue;
+  --primary-background-color: whitesmoke;
+  --secondary-background-color: #fbf8f1;
+  --card-background-color: #f7ffc8;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1;
+}
+
+p {
+  line-height: 1.5;
+}
+
+ol,
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box; /*content, padding, margin*/
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+hr {
+  color: var(--primary-color);
+  height: 20px;
+  margin-top: 0.25em;
+  margin-left: 1.5em;
+  margin-right: 0.25em;
+}
+
+/* UTILITY CLASSES */
+
+.flow-content > * + * {
+  margin-top: 1rem;
+}
+
+.container {
+  padding: 1rem;
+}
+
+.dark-background {
+  background-color: var(--neutral-color);
+  color: whitesmoke;
+}
+
+/* LAYOUT */
+
+body {
+  background: var(--primary-background-color);
+  color: var(--default-text-color);
+  font-family: var(--default-font-family);
+  font-size: var(--default-font-size);
+  margin: auto;
+}
+
+/* LINKS */
+
+a,
+a:visited {
+  color: #078054;
+}
+
+a:hover,
+a:active {
+  color: purple;
+}
+
+/* BUTTONS */
+
+.button,
+.button:visited {
+  display: inline-block;
+  background: ivory;
+  text-decoration: none;
+  border-style: none;
+  padding: 0.5em 1em;
+  cursor: pointer;
+}
+.login {
+  border-radius: 40%;
+  display: block;
+  height: 40px;
+  width: 40px;
+  text-align: center;
+  font-size: 32px;
+  border-style: none;
+  padding: 7px;
+  grid-row: 2;
+  grid-column: 3;
+  margin-left: 1.3rem;
+}
+.cart {
+  border-radius: 40%;
+  height: 40px;
+  width: 40px;
+  color: #110780;
+  border-style: none;
+  text-align: center;
+  padding: 0em;
+  margin-left: auto;
+  grid-row: 2;
+  grid-column: 2;
+}
+.search-button {
+  border-radius: 50%;
+  height: 28px;
+  width: 28px;
+  border-style: none;
+  text-align: center;
+  margin-left: 2rem;
+  margin-top: 0.3rem;
+  grid-row: 3;
+  grid-column: 3;
+  cursor: pointer;
+}
+.shop-book-button {
+  background-color: var(--secondary-color);
+  color: aliceblue;
+  text-decoration: none;
+  width: 10em;
+  height: 3em;
+  position: absolute;
+  top: 15rem;
+  left: 41%;
+  font-size: 24px;
+  font-family: inherit;
+  font-weight: bolder;
+  border-style: none;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+}
+.shop-book-button:hover {
+  background-color: purple;
+}
+.add-to-cart {
+  max-width: 145px;
+  height: 35px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.19);
+  background-color: var(--secondary-color);
+  color: var(--secondary-background-color);
+  font-size: 17px;
+  font-family: "Nunito", sans-serif;
+  text-align: center;
+  padding: 0;
+  margin: 0 0.2em 0.7em 0;
+  grid-column: 2/3;
+  grid-row: 5/6;
+}
+
+.read-now {
+  color: var(--primary-color);
+  max-width: 89px;
+  max-height: 23px;
+  border-radius: 8px;
+  border: solid var(--primary-color) 2px;
+  font-family: "Nunito", sans-serif;
+  font-weight: bold;
+  text-align: center;
+  font-size: 13px;
+  padding: 0.1em;
+  margin: 1em 0;
+  grid-column: 1/2;
+  grid-row: 1/2;
+  position: relative;
+}
+
+.top-text {
+  font-size: 32px;
+  margin-top: 0;
+  margin-left: 0.1em;
+}
+
+.button:hover,
+.button:active {
+  background: var(--secondary-background-color);
+}
+
+.add-to-cart:hover,
+.add-to-cart:active {
+  background: purple;
+  text-align: center;
+  font-weight: bolder;
+  transition: all 300ms;
+}
+
+.read-now:hover,
+.read-now:active {
+  background: lightgray;
+}
+
+/*FORMS*/
+.form,
+.search-form{
+  grid-row: 3;
+  grid-column: 1;
+  margin-top: 0.43em;
+  margin-left: 2.5rem;
+}
