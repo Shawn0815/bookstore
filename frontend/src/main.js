@@ -34,11 +34,11 @@ new Vue({
     const PriceFormatter = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
     });
 
     Vue.filter("asDollarsAndCents", function (cents) {
-      return PriceFormatter.format(cents / 100.0);
+      return PriceFormatter.format(cents);
     });
   },
 }).$mount("#app");

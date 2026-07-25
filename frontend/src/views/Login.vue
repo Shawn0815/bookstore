@@ -80,7 +80,7 @@ export default {
       this.form = { email: "", password: "" };
       this.emailError = "";
       this.passwordError = "";
-      this.generalError = "";
+      this.serverError = "";
     },
 
     validateName() {
@@ -122,7 +122,7 @@ export default {
       this.validatePassword();
 
       if (this.nameError || this.emailError || this.passwordError) {
-        this.generalError = "請修正表單錯誤後再送出";
+        this.serverError = "請修正表單錯誤後再送出";
         return;
       }
 
@@ -137,7 +137,7 @@ export default {
           })
           .catch((err) => {
             console.error(err);
-            this.generalError = err.message || "登入失敗";
+            this.serverError = (err.response && err.response.data && err.response.data.message) || err.message || "登入失敗";
           });
       } else {
         this.$store.dispatch("register", {
@@ -151,7 +151,7 @@ export default {
           })
           .catch((err) => {
             console.error(err);
-            this.generalError = err.message || "註冊失敗";
+            this.serverError = (err.response && err.response.data && err.response.data.message) || err.message || "註冊失敗";
           });
       }
     },

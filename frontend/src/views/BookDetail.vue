@@ -45,10 +45,13 @@ export default {
   },
   created() {
     const id = this.$route.params.id;
-    fetch(`http://localhost:8080/books/${id}`)
+    fetch(`${process.env.VUE_APP_API_BASE_URL}/books/${id}`)
       .then((res) => res.json())
       .then((data) => {
         this.book = data;
+      })
+      .catch((err) => {
+        console.error(err);
       });
   },
   methods: {
