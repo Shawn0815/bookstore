@@ -164,6 +164,7 @@ export default {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 6px;
   padding-bottom: 8px;
+  font-size: 1.05em; /* 跟側欄 CategoryNav 的按鈕字級對齊 */
 }
 
 /* ===== Logo（回首頁） ===== */

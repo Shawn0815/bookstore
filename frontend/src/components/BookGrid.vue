@@ -23,9 +23,10 @@ export default {
 .book-grid {
   display: flex;
   flex-wrap: wrap; /* 滿一行換行 */
-  gap: 1em; /* 卡片間距 */
-  padding: 1em 1em 1em 3em; /* 左側偏移 */
-  margin-top: 3em;
+  justify-content: center; /* 欄數無法整除時，剩餘空間左右平均分配，不會整塊擠在右邊 */
+  row-gap: 0.5em; /* 兩排書之間的垂直間距，縮小一點 */
+  column-gap: 1em; /* 同一排書之間的間距 */
+  padding: 1em; /* 跟側欄的距離改由 CategoryNav 的 margin-right 負責 */
   align-items: flex-start; /* 避免整列被拉高 */
 }
 

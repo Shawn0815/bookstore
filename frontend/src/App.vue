@@ -42,7 +42,9 @@ body,
   min-height: 100vh; /* 保證至少全螢幕高 */
 }
 
-app-header {
+/* 原本用 app-header / app-footer 標籤選取器完全選不到東西
+   （Vue 會把自訂元件標籤換成該元件模板的根元素），改成用結構選取器 */
+#app > header {
   flex-shrink: 0; /* Header 固定高度 */
 }
 
@@ -53,7 +55,7 @@ app-header {
   background-color: var(--secondary-background-color);
 }
 
-app-footer {
+#app > footer {
   flex-shrink: 0; /* Footer 固定在最下方 */
 }
 </style>

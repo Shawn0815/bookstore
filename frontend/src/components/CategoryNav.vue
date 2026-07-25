@@ -80,11 +80,17 @@ export default {
   background-color: var(--primary-color);
   border-radius: 10px;
   border: var(--primary-color) 3px solid;
-  width: auto; /* 自動寬度 */
-  white-space: nowrap; /* 確保 nav 不換行 */
-  align-self: flex-start;
-  margin-top: 10em;
-  margin-left: 1em;
+  width: 240px; /* 參考書籍電商常見側欄寬度 */
+  white-space: nowrap;
+  align-self: flex-start; /* 跟著內容高度，不撐滿 */
+  margin-top: 3em;
+  margin-left: 4em;
+  margin-right: 3em;
+}
+
+.category-nav .button {
+  padding: 0.8em 1.6em;
+  font-size: 1.05em;
 }
 
 .category-buttons {
