@@ -19,8 +19,9 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    // 24 小時有效時間
-    private static final long EXPIRATION = 1000L * 60 * 60 * 24; // 24小時;
+    // 從 application.properties 讀取 access token 有效時間（毫秒）
+    @Value("${jwt.access-token-expiration}")
+    private long accessTokenExpiration;
 
     // 根據 Base64 編碼的密鑰字串，生成用於簽名的 Key
     private Key getSigningKey() {
@@ -37,7 +38,7 @@ public class JwtUtil {
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email) // 設定主題 (通常是使用者 ID 或 Email)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -61,7 +62,7 @@ public class JwtUtil {
     public String generateExpiredToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
-                .setExpiration(new Date(System.currentTimeMillis() - EXPIRATION - 1))
+                .setExpiration(new Date(System.currentTimeMillis() - accessTokenExpiration - 1))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

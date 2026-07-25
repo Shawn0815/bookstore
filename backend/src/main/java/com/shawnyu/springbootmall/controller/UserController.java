@@ -4,6 +4,7 @@ import com.shawnyu.springbootmall.dto.AuthResponse;
 import com.shawnyu.springbootmall.dto.UserLoginRequest;
 import com.shawnyu.springbootmall.dto.UserRegisterRequest;
 import com.shawnyu.springbootmall.model.User;
+import com.shawnyu.springbootmall.service.RefreshTokenService;
 import com.shawnyu.springbootmall.service.UserService;
 import com.shawnyu.springbootmall.util.JwtUtil;
 import jakarta.validation.Valid;
@@ -23,6 +24,9 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     @PostMapping("/users/register")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid UserRegisterRequest userRegisterRequest) {
         Integer userId = userService.register(userRegisterRequest);
@@ -30,22 +34,24 @@ public class UserController {
         User user = userService.getUserbyId(userId);
 
         String token = jwtUtil.generateToken(user.getEmail());
+        String refreshToken = refreshTokenService.issueRefreshToken(user.getUserId());
 
         System.out.println("token: " + token);
 
         System.out.println("expired token: " + jwtUtil.generateExpiredToken(user.getEmail()));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, refreshToken, user));
     }
 
     @PostMapping("/users/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid UserLoginRequest userLoginRequest) {
         User user = userService.login(userLoginRequest);
         String token = jwtUtil.generateToken(user.getEmail());
+        String refreshToken = refreshTokenService.issueRefreshToken(user.getUserId());
 
         System.out.println("token: " + token);
         System.out.println("expired token: " + jwtUtil.generateExpiredToken(user.getEmail()));
 
-        return ResponseEntity.status(HttpStatus.OK).body(new AuthResponse(token, user));
+        return ResponseEntity.status(HttpStatus.OK).body(new AuthResponse(token, refreshToken, user));
     }
 }
