@@ -135,6 +135,7 @@ export default {
   background-color: var(--secondary-background-color);
   display: flex;
   flex-direction: row;
+  justify-content: center; /* 側欄+書本這個區塊在寬螢幕上置中，不要整塊貼左邊 */
   flex-grow: 1;
 }
 </style>
