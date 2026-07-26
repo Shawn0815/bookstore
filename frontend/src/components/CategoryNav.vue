@@ -80,10 +80,12 @@ export default {
   background-color: var(--primary-color);
   border-radius: 10px;
   border: var(--primary-color) 3px solid;
-  width: 240px; /* 參考書籍電商常見側欄寬度 */
+  width: 150px; /* 縮小一點，避免佔太多空間 */
   white-space: nowrap;
   align-self: flex-start; /* 跟著內容高度，不撐滿 */
   margin-top: 3em;
+  margin-left: 2em; /* 跟左邊界、跟書本區的距離要一樣 */
+  margin-right: 2em;
 }
 
 .category-nav .button {

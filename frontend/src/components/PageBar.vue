@@ -1,52 +1,32 @@
 <template>
   <div class="pagination-container">
-    <!-- 上一頁 -->
+    <!-- 回第一頁 -->
     <router-link
-      :to="getPageLink(currentPage - 1)"
+      :to="getPageLink(1)"
       class="page-link"
       :class="{ disabled: currentPage === 1 }"
     >
-      上一頁
+      第一頁
     </router-link>
 
-    <!-- 頁碼 + 省略號 -->
-    <template v-for="(page, index) in visiblePages">
-      <!-- 省略號可點擊 -->
-      <span
-        v-if="page === 'left-ellipsis'"
-        :key="'left-' + index"
-        class="ellipsis clickable"
-        @click="jumpLeft"
-      >
-        ...
-      </span>
-      <span
-        v-else-if="page === 'right-ellipsis'"
-        :key="'right-' + index"
-        class="ellipsis clickable"
-        @click="jumpRight"
-      >
-        ...
-      </span>
-      <!-- 頁碼 -->
-      <router-link
-        v-else
-        :key="'page-' + page"
-        :to="getPageLink(page)"
-        class="page-link"
-        :class="{ active: page === currentPage }"
-      >
-        {{ page }}
-      </router-link>
-    </template>
-
-    <!-- 下一頁 -->
+    <!-- 頁碼：固定 5 個，跟著目前頁碼滑動 -->
     <router-link
-      :to="getPageLink(currentPage + 1)"
+      v-for="page in visiblePages"
+      :key="'page-' + page"
+      :to="getPageLink(page)"
+      class="page-link"
+      :class="{ active: page === currentPage }"
+    >
+      {{ page }}
+    </router-link>
+
+    <!-- 回最後一頁 -->
+    <router-link
+      :to="getPageLink(totalPages)"
       class="page-link"
       :class="{ disabled: currentPage === totalPages }"
     >
-      下一頁
+      最後一頁
     </router-link>
   </div>
 </template>
@@ -62,33 +42,13 @@ export default {
     visiblePages() {
       const total = this.totalPages;
       const current = this.currentPage;
-      const maxVisible = 7;
-      const pages = [];
+      const windowSize = Math.min(5, total); // 固定顯示 5 個頁碼，跟著目前頁碼滑動
 
-      if (total <= maxVisible) {
-        for (let i = 1; i <= total; i++) pages.push(i);
-      } else {
-        const left = Math.max(2, current - 2);
-        const right = Math.min(total - 1, current + 2);
+      let start = current - 2;
+      start = Math.max(1, start);
+      start = Math.min(start, total - windowSize + 1);
 
-        pages.push(1);
-
-        if (left > 2) {
-          pages.push("left-ellipsis");
-        }
-
-        for (let i = left; i <= right; i++) {
-          pages.push(i);
-        }
-
-        if (right < total - 1) {
-          pages.push("right-ellipsis");
-        }
-
-        pages.push(total);
-      }
-
-      return pages;
+      return Array.from({ length: windowSize }, (_, i) => start + i);
     },
   },
   methods: {
@@ -103,14 +63,6 @@ export default {
           page: pageNumber,
         },
       };
-    },
-    jumpLeft() {
-      const target = Math.max(1, this.currentPage - 3);
-      this.$router.push(this.getPageLink(target));
-    },
-    jumpRight() {
-      const target = Math.min(this.totalPages, this.currentPage + 3);
-      this.$router.push(this.getPageLink(target));
     },
   },
 };
@@ -148,20 +100,5 @@ export default {
 .page-link.disabled {
   pointer-events: none;
   opacity: 0.5;
-}
-
-.ellipsis {
-  padding: 6px 12px;
-  color: #666;
-  user-select: none;
-}
-
-.ellipsis.clickable {
-  cursor: pointer;
-}
-
-.ellipsis.clickable:hover {
-  background: #eee;
-  border-radius: 4px;
 }
 </style>
