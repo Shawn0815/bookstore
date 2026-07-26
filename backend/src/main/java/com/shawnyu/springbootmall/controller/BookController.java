@@ -45,7 +45,7 @@ public class BookController {
 
             // 分頁 Pagination
             @RequestParam(defaultValue = "1") @Min(1) Integer page,
-            @RequestParam(defaultValue = "8") @Max(1000) @Min(0) Integer limit
+            @RequestParam @Max(1000) @Min(0) Integer limit
     ) {
 
         BookQueryParams bookQueryParams = new BookQueryParams();
