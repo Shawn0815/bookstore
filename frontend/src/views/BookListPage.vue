@@ -23,10 +23,10 @@ import PageBar from "@/components/PageBar";
 // 書卡寬度（BookCard.vue 的 .book-box）與 .book-grid 的 gap，用來換算一排放得下幾本
 const CARD_WIDTH = 310;
 const GRID_GAP = 16; // 1em
-// .book-grid 的左右 padding（各 1em）與 .category-nav 的 margin-left/margin-right
+// .book-grid 的左右 padding（各 1em）與 .book-list-page 的 gap（側欄跟書本區之間，3em）
 const GRID_PADDING_LEFT = 16;
 const GRID_PADDING_RIGHT = 16;
-const NAV_MARGIN_LEFT = 64;
+const NAV_MARGIN_LEFT = 0;
 const NAV_MARGIN_RIGHT = 48;
 const ROWS = 2; // 固定顯示兩排
 
@@ -136,6 +136,7 @@ export default {
   display: flex;
   flex-direction: row;
   justify-content: center; /* 側欄+書本這個區塊在寬螢幕上置中，不要整塊貼左邊 */
+  gap: 3em; /* 側欄跟書本區的距離統一由這裡管，側欄本身不再自帶左右邊界，置中才會對稱 */
   flex-grow: 1;
 }
 </style>

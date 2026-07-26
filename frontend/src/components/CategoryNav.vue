@@ -84,8 +84,6 @@ export default {
   white-space: nowrap;
   align-self: flex-start; /* 跟著內容高度，不撐滿 */
   margin-top: 3em;
-  margin-left: 4em;
-  margin-right: 3em;
 }
 
 .category-nav .button {
