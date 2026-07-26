@@ -161,10 +161,11 @@ export default {
 
 <style scoped>
 .login-container {
+  flex: 1; /* 撐滿 main-container 剩下的高度，才能真的上下置中 */
   display: flex;
   justify-content: center;
+  align-items: center; /* 上下置中 */
   padding: 2rem;
-  margin-top: 100px;
 }
 
 .login-card {
