@@ -38,7 +38,26 @@ instance.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// 攔截回應：處理錯誤、自動登出
+// Token 過期時用來自動 refresh 的狀態（避免多個請求同時各自打一次 refresh）
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function subscribeTokenRefresh(callback) {
+  refreshSubscribers.push(callback);
+}
+
+function onTokenRefreshed(newToken) {
+  refreshSubscribers.forEach((callback) => callback(newToken));
+  refreshSubscribers = [];
+}
+
+function forceLogout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = "/login";
+}
+
+// 攔截回應：處理錯誤、401 時先嘗試用 refresh token 換新 access token
 instance.interceptors.response.use(
   (res) => {
     const fullUrl = new URL(res.config.url, res.config.baseURL);
@@ -49,6 +68,7 @@ instance.interceptors.response.use(
     if (error.response) {
       const status = error.response.status;
       const errData = error.response.data;
+      const originalRequest = error.config;
 
       let errMsg = ""
       if (errData.message) {
@@ -60,17 +80,51 @@ instance.interceptors.response.use(
 
       console.error(`[Response Error ${status}]`, errMsg);
 
+      // Token 過期：先試著用 refresh token 換一個新的 access token，換到就重打原本那個請求
+      const storedRefreshToken = localStorage.getItem("refreshToken");
+      const isRefreshCall = originalRequest.url.includes("/users/token/refresh");
+
+      if (status === 401 && storedRefreshToken && !isRefreshCall && !originalRequest._retried) {
+        originalRequest._retried = true;
+
+        if (!isRefreshing) {
+          isRefreshing = true;
+          return instance
+            .post("/users/token/refresh", { refreshToken: storedRefreshToken }, { silent: true })
+            .then((data) => {
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("refreshToken", data.refreshToken);
+              isRefreshing = false;
+              onTokenRefreshed(data.token);
+              originalRequest.headers.Authorization = `Bearer ${data.token}`;
+              return instance(originalRequest);
+            })
+            .catch((refreshError) => {
+              isRefreshing = false;
+              console.warn("Refresh token 也失效了，強制登出", refreshError.message);
+              forceLogout();
+              return Promise.reject(refreshError);
+            });
+        }
+
+        // 已經有另一個請求正在 refresh 了，這個請求排隊等新 token 出來再重打一次
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((newToken) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(instance(originalRequest));
+          });
+        });
+      }
+
       // 如果沒有 silent 才 alert
       if (!error.config.silent) {
         alert(errMsg);
       }
 
-      // Token 過期 → 登出
+      // refresh 也失敗了，或本來就沒有 refresh token 可用 → 直接登出
       if (status === 401) {
-        console.warn("Token expired or invalid. Logging out...");
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/login";
+        console.warn("Token expired or invalid, and no refresh token available. Logging out...");
+        forceLogout();
       }
 
       return Promise.reject(new Error(errMsg));
@@ -108,6 +162,10 @@ export default {
     return instance.post("/users/login", credentials);
   },
 
+  logout(refreshToken) {
+    return instance.post("/users/logout", { refreshToken }, { silent: true });
+  },
+
   // 訂單功能
   placeOrder(orderData) {
     return instance.post("/users/orders", orderData);
@@ -139,11 +197,6 @@ export default {
   },
   
   checkToken() {
-    const token = localStorage.getItem("token");
-    return axios.get(`${API_BASE_URL}/users/token/check`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    return instance.get("/users/token/check", { silent: true });
   }
 };

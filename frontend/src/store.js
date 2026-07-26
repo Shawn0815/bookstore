@@ -10,7 +10,8 @@ export const CURRENT_ORDER_STORAGE_KEY = "currentOrder";
 export const USER_STORAGE_KEY = "user";
 export const CHECKOUT_FORM_KEY = "checkoutForm";
 // 【新增】統一管理 Token 的 Key
-export const TOKEN_STORAGE_KEY = "token"; 
+export const TOKEN_STORAGE_KEY = "token";
+export const REFRESH_TOKEN_STORAGE_KEY = "refreshToken";
 
 export default new Vuex.Store({
   state: {
@@ -22,7 +23,8 @@ export default new Vuex.Store({
     totalPages: 1,
     cart: JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || { cartItemList: [], total: 0, numberOfItems: 0 },
     user: JSON.parse(localStorage.getItem(USER_STORAGE_KEY)) || null,
-    token: localStorage.getItem(TOKEN_STORAGE_KEY) || null, 
+    token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
+    refreshToken: localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY) || null,
     myOrders: [],
     myOrdersPage: 1,
     myOrdersHasMore: true,
@@ -59,15 +61,24 @@ export default new Vuex.Store({
     SET_TOKEN(state, token) {
       state.token = token;
       if (token) {
-        localStorage.setItem(TOKEN_STORAGE_KEY, token); 
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
       } else {
-        localStorage.removeItem(TOKEN_STORAGE_KEY); 
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+      }
+    },
+    SET_REFRESH_TOKEN(state, refreshToken) {
+      state.refreshToken = refreshToken;
+      if (refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+      } else {
+        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       }
     },
     LOGOUT(state) {
       // 清除 Vuex State
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.myOrders = [];
       state.myOrdersPage = 1;
       state.myOrdersHasMore = true;
@@ -171,17 +182,19 @@ export default new Vuex.Store({
       return ApiService.register({ name, email, password })
         .then((data) => {
           commit("SET_TOKEN", data.token);
+          commit("SET_REFRESH_TOKEN", data.refreshToken);
           commit("SET_USER", data.user);
         })
-        .catch((error) => { 
+        .catch((error) => {
           alert(error.message);
           throw error; });
     },
-    
+
     async login({ commit, dispatch }, { email, password }) {
       try {
         const data = await ApiService.login({ email, password });
         commit("SET_TOKEN", data.token);
+        commit("SET_REFRESH_TOKEN", data.refreshToken);
         commit("SET_USER", data.user);
 
         await dispatch("mergeCart"); // 合併 guestCart
@@ -192,8 +205,13 @@ export default new Vuex.Store({
       }
     },
 
-    async logout({ commit }) {
+    async logout({ commit, state }) {
+      const refreshToken = state.refreshToken;
       commit("LOGOUT");
+      if (refreshToken) {
+        // 通知後端撤銷這個 refresh token，失敗也沒關係，本機已經登出了
+        ApiService.logout(refreshToken).catch(() => {});
+      }
     },
 
     /* 購物車功能 */
